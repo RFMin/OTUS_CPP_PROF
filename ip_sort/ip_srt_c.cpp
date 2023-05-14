@@ -1,0 +1,406 @@
+/*
+Выполнение домашнего задания по OTUS С++ Developer Professional.
+Смотри задание в файле "02-homework-12995...pdf"
+Основные решения, заложенные в программу:
+1) считывание IP_адресов в список со структурой данных:
+- поле 0: id записи
+- поле 1: поле 1 IP-адреса
+- поле 2: поле 2 IP-адреса
+- поле 3: поле 3 IP-адреса
+- поле 4: поле 4 IP-адреса
+- указатель на предыдущий элемент;
+- указатель на следующий элемент;
+2) определение максимального количества строк;
+3) создание вспомогательного массива указателей на записи в списке
+4) сортировка вспомогательного массива по возрастанию/убыванию
+5) вывод всего списка по убыванию/возрастанию;
+6) вывод списка согласно критериям в полях.
+Выполнено: Руслан Миначев
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+#define FILENAME_SZ \
+  255  //  expected length of the filename with IP addressed database
+#define LINE_BUFF_SZ 80  //  buffer to read lines from file with IP-addresses
+
+struct Ip {
+  unsigned long id = 0;
+  unsigned char ip1 = 0;
+  unsigned char ip2 = 0;
+  unsigned char ip3 = 0;
+  unsigned char ip4 = 0;
+  Ip *prev = NULL;
+  Ip *next = NULL;
+};
+
+//  aux function to compare value of the ip-fields
+//  returns:
+//  * 0 if a < b
+//  * 1 if a > b
+//  * 2 if a == b
+int Ip_Compare(struct Ip *a, struct Ip *b) {
+  if ((a->ip1) < (b->ip1))
+    return 0;
+  else if ((a->ip1) > (b->ip1))
+    return 1;
+
+  //  if function doesn't exit by this point, field a->ip1 == b->ip1
+  //  and it is necessary to compare second fields
+  if ((a->ip2) < (b->ip2))
+    return 0;
+  else if ((a->ip2) > (b->ip2))
+    return 1;
+
+  if ((a->ip3) < (b->ip3))
+    return 0;
+  else if ((a->ip3) > (b->ip3))
+    return 1;
+
+  if ((a->ip4) < (b->ip4))
+    return 0;
+  else if ((a->ip3) > (b->ip3))  // a->ip4 is > b->ip4
+    return 1;
+  else
+    return 2;  // // a == b
+}
+
+//  aux function to print Ip struct values;
+void Ip_print(struct Ip value) {
+  printf("\nIp-address is %d.%d.%d.%d", value.ip1, value.ip2, value.ip3,
+         value.ip4);
+}
+
+//  prints full list of the elements
+void Ip_list_print(struct Ip *pointer, struct Ip **end, int *qty) {
+  printf("\n=== %s ===", __PRETTY_FUNCTION__);
+  if (pointer != NULL) {
+    do {
+      printf("\nId: %d\tIP: %d.%d.%d.%d,\tcurrent=%p,\tprev=%p,\tnext=%p",
+             pointer->id, pointer->ip1, pointer->ip2, pointer->ip3,
+             pointer->ip4, pointer, pointer->prev, pointer->next);
+      *end = pointer;
+      pointer = pointer->next;
+      ++(*qty);
+    } while (pointer != NULL);
+  } else {
+    printf("\nIp-address list is empty - nothing to print!");
+  }
+}
+
+//  aux function to convert char number into integer number
+int char_to_num(char ch) {
+  int num = 0;
+  switch (ch) {
+    case '0':
+      num = 0;
+      break;
+    case '1':
+      num = 1;
+      break;
+    case '2':
+      num = 2;
+      break;
+    case '3':
+      num = 3;
+      break;
+    case '4':
+      num = 4;
+      break;
+    case '5':
+      num = 5;
+      break;
+    case '6':
+      num = 6;
+      break;
+    case '7':
+      num = 7;
+      break;
+    case '8':
+      num = 8;
+      break;
+    case '9':
+      num = 9;
+      break;
+    default:
+      return (-1);
+  }
+  return (num);
+}
+
+//  used to do parsing of the line in the address-list
+Ip ln_parsing(char buff[]) {
+  // printf("\n=== %s ===", __PRETTY_FUNCTION__);
+  Ip rv = {0, 0, 0, 0, 0, NULL, NULL};  //  structure with line parsed data
+  unsigned char num = 0;  //  current position of the ip-address field
+  char toggle = 0;        //  to toggle field address detection
+  char field = 0;         //  current ip-address field
+  for (int i = 0; (buff[i] != '\0' && field < 5); i++) {
+    if ('0' <= buff[i] && buff[i] <= '9') {
+      if (toggle == 0) {
+        toggle = 1;
+        field++;
+      };
+      num *= 10;
+      num += char_to_num(buff[i]);
+    } else {
+      if (toggle) {
+        switch (field) {
+          case 1: {
+            rv.ip1 = num;
+            break;
+          }
+          case 2: {
+            rv.ip2 = num;
+            break;
+          }
+          case 3: {
+            rv.ip3 = num;
+            break;
+          }
+          case 4: {
+            rv.ip4 = num;
+            break;
+          }
+          default: {
+            printf("\nExcessive fields. Check input data!");
+          }
+        }
+        //  reset field values until new field is met
+        toggle = 0;
+        num = 0;
+      }
+    }
+  }
+  //  DEBUG
+  //  Ip_print(rv);
+  return (rv);
+}
+
+//  used to do linereading
+int line_read(FILE *fh, char buff[]) {
+  int rc = 0;
+  int ch;
+  unsigned char buff_idx = 0;
+  while (((ch = fgetc(fh)) != '\n')) {
+    if (char(ch) != '\n') {
+      buff[buff_idx++] = ch;
+      //  DEBUG
+      //  printf("%c", ch);
+    }
+    if (ch == EOF) {
+      rc = -1;
+      break;
+    }
+  }
+
+  buff[buff_idx++] = '\0';
+  //  DEBUG condition. Delete after DEBUG is completed
+  if (rc == 0) {
+    //  DEBUG
+    //  ln_parsing(buff);
+
+    //  printf("\nReaded line is \"%s\"\n", buffer);
+    //  printf("\n");
+    buff_idx = 0;
+  }
+
+  return (rc);
+}
+
+//  function to add member to the list
+int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
+  int rc = 0;                        //  return code of the function
+  static unsigned int id_field = 0;  //  counter for id-field
+  struct Ip *new_elem = NULL;
+
+  if (*head == NULL) {
+    (*head) = (struct Ip *)malloc(sizeof(struct Ip));
+    if (head != NULL) {
+      id_field++;
+      (*head)->id = id_field;
+      (*head)->ip1 = value.ip1;
+      (*head)->ip2 = value.ip2;
+      (*head)->ip3 = value.ip3;
+      (*head)->ip4 = value.ip4;
+      (*head)->prev = NULL;
+      (*head)->next = NULL;
+      *current = *head;
+      //  DEBUG
+      //  printf("\n*head Ip_add = %p", *head);
+    } else {
+      rc = -1;
+      printf("\nError in memory allocation!");
+    }
+  } else {  //  memory allocation for second and other members
+    //  HOLD - add memory allocation check
+    (new_elem) = (struct Ip *)malloc(sizeof(struct Ip));
+    if (new_elem != NULL) {
+      id_field++;
+      (new_elem)->id = id_field;
+      (new_elem)->ip1 = value.ip1;
+      (new_elem)->ip2 = value.ip2;
+      (new_elem)->ip3 = value.ip3;
+      (new_elem)->ip4 = value.ip4;
+      (new_elem)->prev = *current;
+      (new_elem)->next = NULL;
+      (*current)->next = new_elem;
+      (*current) = (new_elem);
+      //  DEBUG
+      // printf("\n*current = %p,\tcurrent->prev = %p,\tcurrent->next = %p",
+      //        *current, (*current)->prev, (*current)->next);
+    } else {
+      rc = -1;
+      printf("\nError in memory allocation!");
+    }
+  }
+  return (rc);
+}
+
+//  fileopen procedure
+FILE *fileopen() {
+  //  HOLD - uncomment 4 lines to implement "filename" variable and change
+  //  array initialization to ""
+   char filename[FILENAME_SZ] = "list.txt";
+  // char filename[FILENAME_SZ];
+  // printf("\nEnter name of the file with IP addresses: ");
+  // scanf("%s", filename);
+  // printf("Entered filename is %s", filename);
+
+  FILE *fh = NULL;
+  fh = fopen(filename, "r");
+  if (!fh) {
+    printf("\nFile %s is not found.", filename);
+  } else {
+    printf("\nFile %s is found. Reading information from it...\n", filename);
+  }
+  return (fh);
+}
+
+//  used to read ip-addresses from source file
+int fileread(struct Ip **ip_head, struct Ip *current) {
+  printf("\n=== %s ===", __PRETTY_FUNCTION__);
+  char rc = 0;  //  return code of the function
+  struct Ip *head = *ip_head;
+
+  FILE *fh = fileopen();
+  if (!fh) { //  File is not found
+    rc = -1;
+  } else {  //  File is found.
+    int ch;
+    unsigned char buff_idx = 0;
+    char buffer[LINE_BUFF_SZ] = "";
+
+    while (!line_read(fh, buffer)) {
+      //  DEBUG
+      //  printf("\n%s", buffer);
+      //  printf("\nhead fileread = %p", head);
+      //  Ip_print(ln_parsing(buffer));
+      Ip_add(&head, &current, ln_parsing(buffer));
+    }
+    fclose(fh);
+  }
+
+  *ip_head = head;
+  return (rc);
+};
+
+//  function to sort list using Haara method
+void quicksort(struct Ip **array[], int low, int high) {
+  int i = low;
+  int j = high;
+  struct Ip y = {0, 0, 0, 0, 0, NULL, NULL}; //  used to temporary store value during elements swapping
+  struct Ip i_val = {0, 0, 0, 0, 0, NULL, NULL};    //  aux variable to make code easy to read
+  struct Ip j_val = {0, 0, 0, 0, 0, NULL, NULL};    //  aux variable to make code easy to read
+  struct Ip z = *(*(*array + (low + high)/2));      //  median value in the array
+  //  DEBUG
+  //  Ip_print(z);
+
+  do {  //  main do
+    i_val = *(*(*array + i));
+    while ( Ip_Compare(&i_val, &z) == 0 ) {
+      i++;
+      i_val = *(*(*array + i ));
+      //  DEBUG
+      //  Ip_print(i_val);
+      //  Ip_print(z);
+    };
+    
+    j_val = *(*(*array + j));
+    while ( Ip_Compare(&j_val, &z) == 1 ) {
+      j--;
+      j_val = *(*(*array + j ));
+      //  DEBUG
+      //  Ip_print(j_val);
+      //  Ip_print(z);    
+    };
+
+    if ( i <= j ) {
+      y = i_val;
+      i_val = j_val;
+      j_val = i_val;
+      i++;
+      j--;
+    }
+  } while (i <= j); //  main do end
+
+  //  recursion
+  if (low < j)
+    quicksort( array, low, j);
+
+  if (i < high)
+    quicksort( array, i, high);
+
+}
+
+int main(int argc, char *argv[]) {
+  struct Ip *ip_head = NULL;
+  struct Ip *ip_bottom = NULL;
+  struct Ip *ip_current = NULL;
+  int ip_list_qty = 0;
+
+  char fr = fileread(&ip_head, ip_current);
+  Ip_list_print(ip_head, &ip_bottom, &ip_list_qty);
+
+  //  DEBUG
+  // printf("\nStart pointer %p,\tLast pointer %p,\tNumber of the elements %d\n",
+  //        ip_head, ip_bottom, ip_list_qty);
+
+  //  DEBUG
+  // switch (Ip_Compare((ip_head + 24), ip_bottom)) {
+  //   case 0:
+  //     printf("ip_head is less than bottom");
+  //     break;
+  //   case 1:
+  //     printf("ip_head is bigger than bottom");
+  //     break;
+  //   case 2:
+  //     printf("ip_head is equal to bottom");
+  //     break;
+  // };
+
+  //  pointers array
+  struct Ip **aux_ptr_array = NULL;
+  aux_ptr_array =
+      (struct Ip **)realloc(aux_ptr_array, ip_list_qty * sizeof(struct Ip *));
+  ip_current = ip_head;
+  for (int i = 0; i < ip_list_qty; ++i) {
+    aux_ptr_array[i] = ip_current;
+    ip_current = ip_current->next;
+  }
+
+  //  DEBUG
+  // for (int i = 0; i < ip_list_qty; ++i) {
+  //   printf("\ni: %d,\tpointer %p", i, aux_ptr_array[i]);
+  // }
+
+  quicksort(&aux_ptr_array, 0, ip_list_qty-1);
+
+  for (int i = 0; i < ip_list_qty; ++i) {
+    printf("\ni: %d,\tpointer %p", i, aux_ptr_array[i]);
+  }
+
+  return (0);
+}
