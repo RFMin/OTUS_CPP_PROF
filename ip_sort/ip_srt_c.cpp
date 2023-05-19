@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define FILENAME_SZ \
   255  //  expected length of the filename with IP addressed database
 #define LINE_BUFF_SZ 80  //  buffer to read lines from file with IP-addresses
@@ -61,10 +60,10 @@ int Ip_Compare(struct Ip *a, struct Ip *b) {
 
   if ((a->ip4) < (b->ip4))
     return 0;
-  else if ((a->ip3) > (b->ip3))  // a->ip4 is > b->ip4
+  else if ((a->ip4) > (b->ip4))  // a->ip4 is > b->ip4
     return 1;
   else
-    return 2;  // // a == b
+    return 2;  // a == b
 }
 
 //  aux function to print Ip struct values;
@@ -75,16 +74,31 @@ void Ip_print(struct Ip value) {
 
 //  prints full list of the elements
 void Ip_list_print(struct Ip *pointer, struct Ip **end, int *qty) {
-  printf("\n=== %s ===", __PRETTY_FUNCTION__);
+  //  printf("\n=== %s ===", __PRETTY_FUNCTION__);
   if (pointer != NULL) {
     do {
-      printf("\nId: %d\tIP: %d.%d.%d.%d,\tcurrent=%p,\tprev=%p,\tnext=%p",
-             pointer->id, pointer->ip1, pointer->ip2, pointer->ip3,
-             pointer->ip4, pointer, pointer->prev, pointer->next);
+      // printf("\nId: %d\tIP: %d.%d.%d.%d,\tcurrent=%p,\tprev=%p,\tnext=%p",
+      //        pointer->id, pointer->ip1, pointer->ip2, pointer->ip3,
+      //        pointer->ip4, pointer, pointer->prev, pointer->next);
       *end = pointer;
       pointer = pointer->next;
       ++(*qty);
     } while (pointer != NULL);
+  } else {
+    printf("\nIp-address list is empty - nothing to print!");
+  }
+}
+
+//  prints lists of the elements from element X to element Y
+void Ip_elements_print(struct Ip **pointer[], int x, int y) {
+  //  printf("\n=== %s ===", __PRETTY_FUNCTION__);
+  if ((**pointer != NULL) && (x < y)) {
+    do {
+      printf("\nId: %d\tIP: %d.%d.%d.%d", (*(*pointer + x))->id,
+             (*(*pointer + x))->ip1, (*(*pointer + x))->ip2,
+             (*(*pointer + x))->ip3, (*(*pointer + x))->ip4);
+      x++;
+    } while (x <= y);
   } else {
     printf("\nIp-address list is empty - nothing to print!");
   }
@@ -219,7 +233,6 @@ int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
   if (*head == NULL) {
     (*head) = (struct Ip *)malloc(sizeof(struct Ip));
     if (head != NULL) {
-      id_field++;
       (*head)->id = id_field;
       (*head)->ip1 = value.ip1;
       (*head)->ip2 = value.ip2;
@@ -230,6 +243,7 @@ int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
       *current = *head;
       //  DEBUG
       //  printf("\n*head Ip_add = %p", *head);
+      id_field++;
     } else {
       rc = -1;
       printf("\nError in memory allocation!");
@@ -238,7 +252,6 @@ int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
     //  HOLD - add memory allocation check
     (new_elem) = (struct Ip *)malloc(sizeof(struct Ip));
     if (new_elem != NULL) {
-      id_field++;
       (new_elem)->id = id_field;
       (new_elem)->ip1 = value.ip1;
       (new_elem)->ip2 = value.ip2;
@@ -251,6 +264,7 @@ int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
       //  DEBUG
       // printf("\n*current = %p,\tcurrent->prev = %p,\tcurrent->next = %p",
       //        *current, (*current)->prev, (*current)->next);
+      id_field++;
     } else {
       rc = -1;
       printf("\nError in memory allocation!");
@@ -263,7 +277,8 @@ int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
 FILE *fileopen() {
   //  HOLD - uncomment 4 lines to implement "filename" variable and change
   //  array initialization to ""
-   char filename[FILENAME_SZ] = "list.txt";
+  //  char filename[FILENAME_SZ] = "list.txt";
+  char filename[FILENAME_SZ] = "ip_filter.tsv";
   // char filename[FILENAME_SZ];
   // printf("\nEnter name of the file with IP addresses: ");
   // scanf("%s", filename);
@@ -274,19 +289,20 @@ FILE *fileopen() {
   if (!fh) {
     printf("\nFile %s is not found.", filename);
   } else {
-    printf("\nFile %s is found. Reading information from it...\n", filename);
+    //  DEBUG purposes
+    //  printf("\nFile %s is found. Reading information from it...\n", filename);
   }
   return (fh);
 }
 
 //  used to read ip-addresses from source file
 int fileread(struct Ip **ip_head, struct Ip *current) {
-  printf("\n=== %s ===", __PRETTY_FUNCTION__);
+  //  printf("\n=== %s ===", __PRETTY_FUNCTION__);
   char rc = 0;  //  return code of the function
   struct Ip *head = *ip_head;
 
   FILE *fh = fileopen();
-  if (!fh) { //  File is not found
+  if (!fh) {  //  File is not found
     rc = -1;
   } else {  //  File is found.
     int ch;
@@ -294,10 +310,6 @@ int fileread(struct Ip **ip_head, struct Ip *current) {
     char buffer[LINE_BUFF_SZ] = "";
 
     while (!line_read(fh, buffer)) {
-      //  DEBUG
-      //  printf("\n%s", buffer);
-      //  printf("\nhead fileread = %p", head);
-      //  Ip_print(ln_parsing(buffer));
       Ip_add(&head, &current, ln_parsing(buffer));
     }
     fclose(fh);
@@ -308,51 +320,54 @@ int fileread(struct Ip **ip_head, struct Ip *current) {
 };
 
 //  function to sort list using Haara method
+//  HOLD - function to be optimized swapping pointer rather than values of the list!!!
 void quicksort(struct Ip **array[], int low, int high) {
   int i = low;
   int j = high;
-  struct Ip y = {0, 0, 0, 0, 0, NULL, NULL}; //  used to temporary store value during elements swapping
-  struct Ip i_val = {0, 0, 0, 0, 0, NULL, NULL};    //  aux variable to make code easy to read
-  struct Ip j_val = {0, 0, 0, 0, 0, NULL, NULL};    //  aux variable to make code easy to read
-  struct Ip z = *(*(*array + (low + high)/2));      //  median value in the array
+  struct Ip y = {0, 0,    0,   0,
+                 0, NULL, NULL};  //  used to temporary store value during
+                                  //  elements swapping
+  struct Ip i_val = {0, 0,    0,   0,
+                     0, NULL, NULL};  //  aux variable to make code easy to read
+  struct Ip j_val = {0, 0,    0,   0,
+                     0, NULL, NULL};  //  aux variable to make code easy to read
+  struct Ip z = *(*(*array + (low + high) / 2));  //  median value in the array
   //  DEBUG
-  //  Ip_print(z);
+  // printf("\n== QUICKSORT iteration ==");
+  // Ip_elements_print(array, low, high);
+  // printf("\nlow = %d,\thigh = %d", low, high);
+  // printf("\n====  z_val: ");
+  // Ip_print(z);
 
   do {  //  main do
     i_val = *(*(*array + i));
-    while ( Ip_Compare(&i_val, &z) == 0 ) {
+    //  * 0 if i_val < z
+    while (Ip_Compare(&i_val, &z) == 0) {
       i++;
-      i_val = *(*(*array + i ));
-      //  DEBUG
-      //  Ip_print(i_val);
-      //  Ip_print(z);
-    };
-    
-    j_val = *(*(*array + j));
-    while ( Ip_Compare(&j_val, &z) == 1 ) {
-      j--;
-      j_val = *(*(*array + j ));
-      //  DEBUG
-      //  Ip_print(j_val);
-      //  Ip_print(z);    
+      i_val = *(*(*array + i));
     };
 
-    if ( i <= j ) {
+    j_val = *(*(*array + j));
+    //  * 1 - if j_val > z
+    while (Ip_Compare(&j_val, &z) == 1) {
+      j--;
+      j_val = *(*(*array + j));
+    };
+
+    if (i <= j) {
+      //  HOLD - not optimum sorting due to swapping values
+      //  It is much more efficient to swap pointers!!! Optimization could be done later
       y = i_val;
-      i_val = j_val;
-      j_val = i_val;
+      *(*(*array + i)) = j_val;
+      *(*(*array + j)) = y;
       i++;
       j--;
     }
-  } while (i <= j); //  main do end
+  } while (i <= j);  //  main do end
 
   //  recursion
-  if (low < j)
-    quicksort( array, low, j);
-
-  if (i < high)
-    quicksort( array, i, high);
-
+  if (low < j) quicksort(array, low, j);
+  if (i < high) quicksort(array, i, high);
 }
 
 int main(int argc, char *argv[]) {
@@ -362,26 +377,12 @@ int main(int argc, char *argv[]) {
   int ip_list_qty = 0;
 
   char fr = fileread(&ip_head, ip_current);
+  //  DEBUG - to confirm proper reading of the
   Ip_list_print(ip_head, &ip_bottom, &ip_list_qty);
 
-  //  DEBUG
-  // printf("\nStart pointer %p,\tLast pointer %p,\tNumber of the elements %d\n",
-  //        ip_head, ip_bottom, ip_list_qty);
-
-  //  DEBUG
-  // switch (Ip_Compare((ip_head + 24), ip_bottom)) {
-  //   case 0:
-  //     printf("ip_head is less than bottom");
-  //     break;
-  //   case 1:
-  //     printf("ip_head is bigger than bottom");
-  //     break;
-  //   case 2:
-  //     printf("ip_head is equal to bottom");
-  //     break;
-  // };
-
-  //  pointers array
+  //  pointers array to make soring more efficient, it is necessary to swap pointers of the 
+  //  IP-list instead of the real IP-values
+  //  Optimization is not implemented - to be done later
   struct Ip **aux_ptr_array = NULL;
   aux_ptr_array =
       (struct Ip **)realloc(aux_ptr_array, ip_list_qty * sizeof(struct Ip *));
@@ -396,11 +397,13 @@ int main(int argc, char *argv[]) {
   //   printf("\ni: %d,\tpointer %p", i, aux_ptr_array[i]);
   // }
 
-  quicksort(&aux_ptr_array, 0, ip_list_qty-1);
+  //  DEBUG - print list before sorting
+  //  Ip_elements_print(&aux_ptr_array, 0, ip_list_qty - 1);
 
-  for (int i = 0; i < ip_list_qty; ++i) {
-    printf("\ni: %d,\tpointer %p", i, aux_ptr_array[i]);
-  }
+  quicksort(&aux_ptr_array, 0, ip_list_qty - 1);
+
+  //  DEBUG - print list after sorting
+  Ip_elements_print(&aux_ptr_array, 0, ip_list_qty - 1);
 
   return (0);
 }
