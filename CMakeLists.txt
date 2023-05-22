@@ -10,7 +10,7 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 configure_file(version.h.in version.h)
 
 add_executable(ip_sort_cli ip_srt_c.cpp)
-add_library(ip_sort lib.cpp)
+#add_library(ip_sort lib.cpp)
 add_library(ip_sort ip_srt_lib.c)
 add_executable(test_version test_version.cpp)
 
