@@ -4,8 +4,16 @@ set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
 # helps to link glibc library to binary file to allow application run on Astra Linux there glibc2.34 is not available
-set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_EXE_LINKER_FLAGS "-static")
+# set(BUILD_SHARED_LIBS OFF)
+# set(CMAKE_EXE_LINKER_FLAGS "-static")
+# didn't work dut to following:
+# [100%] Linking CXX executable test_version
+# /usr/bin/ld: attempted static link of dynamic object `/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so.1.74.0'
+# collect2: error: ld returned 1 exit status
+# gmake[2]: *** [CMakeFiles/test_version.dir/build.make:99: test_version] Error 1
+# gmake[1]: *** [CMakeFiles/Makefile2:139: CMakeFiles/test_version.dir/all] Error 2
+# gmake: *** [Makefile:166: all] Error 2
+# Error: Process completed with exit code 2.
 
 project(ip_sort VERSION ${PROJECT_VESRION})
 
@@ -31,7 +39,9 @@ set_target_properties(test_version PROPERTIES
     INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR}
 )
 
-target_link_libraries(ip_sort_cli PRIVATE
+# target_link_libraries(ip_sort_cli PRIVATE
+#     ip_sort
+target_link_libraries(ip_sort_cli -static
     ip_sort
 )
 target_link_libraries(test_version
