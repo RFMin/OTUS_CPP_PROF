@@ -112,7 +112,7 @@ int char_to_num(char ch) {
 //  used to do parsing of the line in the address-list
 struct Ip ln_parsing(char buff[]) {
   // printf("\n=== %s ===", __PRETTY_FUNCTION__);
-  Ip rv = {0, 0, 0, 0, 0, NULL, NULL};  //  structure with line parsed data
+  struct Ip rv = {0, 0, 0, 0, 0, NULL, NULL};  //  structure with line parsed data
   unsigned char num = 0;  //  current position of the ip-address field
   char toggle = 0;        //  to toggle field address detection
   char field = 0;         //  current ip-address field
@@ -164,7 +164,7 @@ int line_read(FILE *fh, char buff[]) {
   int ch;
   unsigned char buff_idx = 0;
   while (((ch = fgetc(fh)) != '\n')) {
-    if (char(ch) != '\n') {
+    if ( (ch) != '\n') {
       buff[buff_idx++] = ch;
       //  DEBUG
       //  printf("%c", ch);
