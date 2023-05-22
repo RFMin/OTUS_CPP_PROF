@@ -14,13 +14,13 @@ extern "C" {
 #define LINE_BUFF_SZ 80  //  buffer to read lines from file with IP-addresses
 
 struct Ip {
-  unsigned long id = 0;
-  unsigned char ip1 = 0;
-  unsigned char ip2 = 0;
-  unsigned char ip3 = 0;
-  unsigned char ip4 = 0;
-  Ip *prev = NULL;
-  Ip *next = NULL;
+  unsigned long id;
+  unsigned char ip1;
+  unsigned char ip2;
+  unsigned char ip3;
+  unsigned char ip4;
+  Ip *prev;
+  Ip *next;
 };
 
 //  aux function to compare value of the ip-fields
@@ -43,7 +43,7 @@ void Ip_elements_print(struct Ip **pointer[], int x, int y);
 int char_to_num(char ch);
 
 //  used to do parsing of the line in the address-list
-Ip ln_parsing(char buff[]);
+struct Ip ln_parsing(char buff[]);
 
 //  used to do linereading
 int line_read(FILE *fh, char buff[]);

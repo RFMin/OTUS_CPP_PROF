@@ -110,7 +110,7 @@ int char_to_num(char ch) {
 }
 
 //  used to do parsing of the line in the address-list
-Ip ln_parsing(char buff[]) {
+struct Ip ln_parsing(char buff[]) {
   // printf("\n=== %s ===", __PRETTY_FUNCTION__);
   Ip rv = {0, 0, 0, 0, 0, NULL, NULL};  //  structure with line parsed data
   unsigned char num = 0;  //  current position of the ip-address field
