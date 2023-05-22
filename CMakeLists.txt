@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
+# helps to link glibc library to binary file to allow application run on Astra Linux there glibc2.34 is not available
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_EXE_LINKER_FLAGS "-static")
+
 project(ip_sort VERSION ${PROJECT_VESRION})
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
@@ -47,13 +51,13 @@ if (MSVC)
     )
 else ()
     target_compile_options(ip_sort_cli PRIVATE
-        -Wall -Wextra -pedantic -Werror -static
+        -Wall -Wextra -Wpedantic -Werror -static
     )
     target_compile_options(ip_sort PRIVATE
-        -Wall -Wextra -pedantic -Werror -static
+        -Wall -Wextra -Wpedantic -Werror -static
     )
     target_compile_options(test_version PRIVATE
-        -Wall -Wextra -pedantic -Werror
+        -Wall -Wextra -Wpedantic -Werror -static
     )
 endif()
 
