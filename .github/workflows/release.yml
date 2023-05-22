@@ -16,9 +16,9 @@ jobs:
           submodules: true
       - run: sudo apt-get update && sudo apt-get install libboost-test-dev -y
       - run: cmake . -DPATCH_VERSION=${{ github.run_number }}
-      - run: cmake --build ./ip_sort/
-      - run: cmake --build ./ip_sort/ --target test
-      - run: cmake --build ./ip_sort/ --target package
+      - run: cmake --build .
+      - run: cmake --build . --target test
+      - run: cmake --build . --target package
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
