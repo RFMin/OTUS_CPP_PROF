@@ -19,8 +19,8 @@ struct Ip {
   unsigned char ip2;
   unsigned char ip3;
   unsigned char ip4;
-  Ip *prev;
-  Ip *next;
+  struct Ip *prev;
+  struct Ip *next;
 };
 
 //  aux function to compare value of the ip-fields
