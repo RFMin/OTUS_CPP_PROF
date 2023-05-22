@@ -14,7 +14,7 @@ add_library(ip_sort lib.cpp ip_srt_lib.c)
 add_executable(test_version test_version.cpp)
 
 set_target_properties(ip_sort_cli ip_sort test_version PROPERTIES
-    CXX_STANDARD 14
+    CXX_STANDARD 11
     CXX_STANDARD_REQUIRED ON
 )
 target_include_directories(ip_sort
