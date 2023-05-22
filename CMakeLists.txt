@@ -16,6 +16,8 @@ add_executable(test_version test_version.cpp)
 set_target_properties(ip_sort_cli ip_sort test_version PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED ON
+    C_STANDARD 11
+    C_STANDARD_REQUIRED ON
 )
 target_include_directories(ip_sort
     PRIVATE "${CMAKE_BINARY_DIR}"
@@ -45,10 +47,10 @@ if (MSVC)
     )
 else ()
     target_compile_options(ip_sort_cli PRIVATE
-        -Wall -Wextra -pedantic -Werror
+        -Wall -Wextra -pedantic -Werror -static
     )
     target_compile_options(ip_sort PRIVATE
-        -Wall -Wextra -pedantic -Werror
+        -Wall -Wextra -pedantic -Werror -static
     )
     target_compile_options(test_version PRIVATE
         -Wall -Wextra -pedantic -Werror
