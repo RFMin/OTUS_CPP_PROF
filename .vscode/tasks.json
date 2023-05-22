@@ -10,6 +10,7 @@
                 "-Wall",
                 "-Wpedantic",
                 "-Werror",
+                "-Wextra",
                 //  "${file}",
                 "ip_srt_*.*",
                 "-o",

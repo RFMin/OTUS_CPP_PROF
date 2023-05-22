@@ -242,8 +242,8 @@ int Ip_add(struct Ip **head, struct Ip **current, struct Ip value) {
 FILE *fileopen() {
   //  HOLD - uncomment 4 lines to implement "filename" variable and change
   //  array initialization to ""
-  //  char filename[FILENAME_SZ] = "list.txt";
-  char filename[FILENAME_SZ] = "ip_filter.tsv";
+   char filename[FILENAME_SZ] = "list.txt";
+  // char filename[FILENAME_SZ] = "ip_filter.tsv";
   // char filename[FILENAME_SZ];
   // printf("\nEnter name of the file with IP addresses: ");
   // scanf("%s", filename);

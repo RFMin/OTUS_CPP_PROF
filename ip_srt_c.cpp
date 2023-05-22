@@ -24,7 +24,7 @@
 #include "lib.h"
 
 
-int main(int argc, char *argv[]) {
+int main() {
   struct Ip *ip_head = NULL;
   struct Ip *ip_bottom = NULL;
   struct Ip *ip_current = NULL;
