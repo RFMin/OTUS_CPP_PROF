@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ip_srt_lib.h"
+#include "lib.h"
 
 
 int main(int argc, char *argv[]) {
