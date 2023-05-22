@@ -36,7 +36,8 @@
 /materials/
 /sources_review/
 /dummy/
-/ip_sort/build/
+/ip_sort_materials/
+/build/
 
 # other files
 *.pdf
