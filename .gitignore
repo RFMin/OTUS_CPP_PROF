@@ -35,6 +35,8 @@
 /general/
 /materials/
 /sources_review/
+/dummy/
+/ip_sort/build/
 
 # other files
 *.pdf

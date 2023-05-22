@@ -55,7 +55,8 @@
         "cfenv": "cpp",
         "cinttypes": "cpp",
         "typeindex": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "*.tpp": "cpp" //все tpp файлы
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

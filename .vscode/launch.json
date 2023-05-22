@@ -28,6 +28,9 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "enter program name, for example ${workspaceFolder}/a.out",
+            // program": "${workspaceFolder}/bin/main", //указал место где лежит мой собранный исходник
+            // "preLaunchTask": "Build C++ project", //указал что перед запуском мы должны предварительно пересобрать проект
+            // "args": [],
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
